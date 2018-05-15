@@ -35,8 +35,7 @@ module Solargraph
       @virtual_source = nil
       @yard_stale = true
       # process_maps
-      @sources = workspace.sources
-      refresh_store_and_maps
+      refresh(true)
     end
 
     # Create an ApiMap with a workspace in the specified directory.
@@ -122,9 +121,9 @@ module Solargraph
     #
     # @param force [Boolean] Perform a refresh even if the map is not "stale."
     def refresh force = false
-      return unless @force or changed?
+      return unless force || changed?
       if force
-        @api_map = ApiMap::Store.new(@sources)
+        refresh_store_and_maps
       else
         store.remove *(current_workspace_sources.reject{ |s| workspace.sources.include?(s) })
         @sources = workspace.sources
@@ -423,6 +422,8 @@ module Solargraph
     private
 
     def refresh_store_and_maps
+      @sources = @workspace.sources
+      @defs = @workspace.sources.flat_map(&:defs).compact
       @store = ApiMap::Store.new(@sources)
       @live_map = Solargraph::LiveMap.new(self)
       @yard_map = Solargraph::YardMap.new(required: required, workspace: workspace)
