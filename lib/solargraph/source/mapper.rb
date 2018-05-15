@@ -11,6 +11,8 @@ module Solargraph
 
       private_class_method :new
 
+      autoload :PinList, 'solargraph/source/pin_list'
+
       # Generate the data.
       #
       # @return [Array]
@@ -29,10 +31,10 @@ module Solargraph
         @path_macros = {}
         @domains = []
 
-        @pins = []
+        @pins = PinList.new
         @requires = []
         @symbols = []
-        @locals = []
+        @locals = PinList.new
 
         # HACK make sure the first node gets processed
         root = AST::Node.new(:source, [filename])
@@ -41,7 +43,7 @@ module Solargraph
         @pins.push Pin::Namespace.new(get_node_location(nil), '', '', nil, :class, :public, nil)
         process root
         process_directives
-        [@pins, @locals, @requires, @symbols, @path_macros, @domains]
+        [@pins, @locals, @requires, @symbols, @path_macros, @domains, @defs]
       end
 
       class << self
@@ -72,8 +74,9 @@ module Solargraph
         @comments
       end
 
+
       def pins
-        @pins ||= []
+        @pins
       end
 
       def process node, tree = [], visibility = :public, scope = :instance, fqn = '', stack = []
@@ -344,7 +347,7 @@ module Solargraph
         end
         range = Range.new(st, en)
         Location.new(filename, range)
-      end  
+      end
 
       def associate_comments node, comments
         return nil if comments.nil?

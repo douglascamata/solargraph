@@ -33,23 +33,36 @@ module Solargraph
           VirtualPin.new(type)
         end
         return [] if pins.empty?
-        rest = rest.split('.')
-        last = rest.pop
-        rest.each do |meth|
-          found = nil
-          pins.each do |pin|
-            found = infer_method_name_pins(meth, pin)
-            next if found.empty?
-            pins = found
-            break
-          end
-          return [] if found.nil?
-        end
-        pins.each do |pin|
-          found = infer_method_name_pins(last, pin)
-          return found unless found.empty?
-        end
-        []
+        return smart_find_def
+
+        # rest = rest.split('.')
+        # last = rest.pop
+        # rest.each do |meth|
+        #   found = nil
+        #   pins.each do |pin|
+        #     found = infer_method_name_pins(meth, pin)
+        #     next if found.empty?
+        #     pins = found
+        #     break
+        #   end
+        #   return [] if found.nil?
+        # end
+        # pins.each do |pin|
+        #   found = infer_method_name_pins(last, pin)
+        #   return found unless found.empty?
+        # end
+        # []
+      end
+
+      def smart_find_def(method_name, namespace)
+        namespace = if context_pin.kind == Pin::NAMESPACE
+              pin.path
+            else
+              pin.namespace
+            end
+
+        pin = @api_map.defs[[signature, namespace]]
+        type = resolve_pin_type(pin)
       end
 
       # Get the return type for the signature.

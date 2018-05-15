@@ -46,6 +46,8 @@ module Solargraph
 
     attr_reader :domains
 
+    attr_reader :defs
+
     attr_reader :locals
 
     include NodeMethods
@@ -273,7 +275,7 @@ module Solargraph
     end
 
     def process_parsed node, comments
-      @pins, @locals, @requires, @symbols, @path_macros, @domains = Mapper.map filename, code, node, comments
+      @pins, @locals, @requires, @symbols, @path_macros, @domains, @defs = Mapper.map filename, code, node, comments
       @stime = Time.now
     end
 
